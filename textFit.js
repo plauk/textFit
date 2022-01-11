@@ -41,6 +41,8 @@
     reProcess: true, // if true, textFit will re-process already-fit nodes. Set to 'false' for better performance
     widthOnly: false, // if true, textFit will fit text to element width, regardless of text height
     alignVertWithFlexbox: false, // if true, textFit will use flexbox for vertical alignment
+	inlineBlock: true, // if true, textFit will use `display: inline-block;` on fitted element
+	alignVertWithPadding: false, // if true, textFit will use `padding-top` for vertical alignment
   };
 
   return function textFit(els, options) {
@@ -114,7 +116,7 @@
       innerSpan.className = 'textFitted';
       // Inline block ensure it takes on the size of its contents, even if they are enclosed
       // in other tags like <p>
-      innerSpan.style['display'] = 'inline-block';
+      if (settings.inlineBlock) { innerSpan.style['display'] = 'inline-block' };
       innerSpan.innerHTML = originalHTML;
       el.innerHTML = '';
       el.appendChild(innerSpan);
@@ -173,17 +175,24 @@
 
     // Our height is finalized. If we are aligning vertically, set that up.
     if (settings.alignVert) {
-      addStyleSheet();
-      var height = innerSpan.scrollHeight;
-      if (window.getComputedStyle(el)['position'] === "static"){
-        el.style['position'] = 'relative';
-      }
-      if (!hasClass(innerSpan, "textFitAlignVert")){
-        innerSpan.className = innerSpan.className + " textFitAlignVert";
-      }
-      innerSpan.style['height'] = height + "px";
-      if (settings.alignVertWithFlexbox && !hasClass(el, "textFitAlignVertFlex")) {
-        el.className = el.className + " textFitAlignVertFlex";
+      if (settings.alignVertWithPadding) {
+        addStyleSheet();
+		var height = innerHeight(innerSpan);
+		var offset = (innerHeight(el) - height)/2;
+		el.style.paddingTop = offset + "px";
+	  } else {
+		addStyleSheet();
+		var height = innerSpan.scrollHeight;
+		if (window.getComputedStyle(el)['position'] === "static"){
+		  el.style['position'] = 'relative';
+		}
+		if (!hasClass(innerSpan, "textFitAlignVert")){
+		  innerSpan.className = innerSpan.className + " textFitAlignVert";
+		}
+		innerSpan.style['height'] = height + "px";
+		if (settings.alignVertWithFlexbox && !hasClass(el, "textFitAlignVertFlex")) {
+		  el.className = el.className + " textFitAlignVertFlex";
+		}
       }
     }
   }
